@@ -1,7 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import type { NodeType } from '../store/mindMapSlice';
-import { addNode, renameNode, toggleCollapse, updatePosition } from '../store/mindMapSlice';
+import {
+  addNode,
+  renameNode,
+  toggleCollapse,
+  updatePosition,
+} from '../store/mindMapSlice';
 import styled from 'styled-components';
 
 interface Props {
@@ -12,9 +17,9 @@ const NodeBox = styled.div<{ x: number; y: number; isRoot: boolean }>`
   position: absolute;
   top: ${p => p.y}px;
   left: ${p => p.x}px;
-  min-width: 140px;
-  max-width: 200px;
-  padding: 10px 12px;
+  min-width: 160px;
+  max-width: 220px;
+  padding: 12px 14px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
@@ -30,27 +35,51 @@ const NodeBox = styled.div<{ x: number; y: number; isRoot: boolean }>`
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   }
 
+  .label {
+    margin-bottom: 12px;
+    word-wrap: break-word;
+  }
+
   input {
     width: 100%;
     font-size: 14px;
-    padding: 4px;
+    padding: 5px;
     border: 1px solid #aaa;
     border-radius: 6px;
     outline: none;
+    margin-bottom: 12px;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
   }
 
   button {
-    margin: 4px 2px;
-    padding: 2px 6px;
+    flex: 1;
+    padding: 4px 6px;
     font-size: 12px;
     background: #ffffff;
     border: 1px solid #bbb;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 
     &:hover {
       background: #f0f0f0;
     }
+  }
+
+  .arrow {
+    font-size: 12px;
+    line-height: 1;
   }
 `;
 
@@ -87,6 +116,13 @@ const NodeItem = ({ node }: Props) => {
 
   const isRoot = node.parentId === null;
 
+  const handleAddNode = () => {
+    if (node.collapsed) {
+      dispatch(toggleCollapse(node.id)); // Auto-expand if collapsed
+    }
+    dispatch(addNode({ parentId: node.id }));
+  };
+
   return (
     <NodeBox
       x={node.position.x}
@@ -109,12 +145,21 @@ const NodeItem = ({ node }: Props) => {
           }}
         />
       ) : (
-        <div>{node.label}</div>
+        <div className="label">{node.label}</div>
       )}
-      <div style={{ marginTop: '6px' }}>
-        <button onClick={() => dispatch(addNode({ parentId: node.id }))}>+</button>
+
+      <div className="button-row">
+        <button onClick={handleAddNode}>＋</button>
         <button onClick={() => dispatch(toggleCollapse(node.id))}>
-          {node.collapsed ? 'Expand' : 'Collapse'}
+          {node.collapsed ? (
+            <>
+              Expand <span className="arrow">▸</span>
+            </>
+          ) : (
+            <>
+              Collapse <span className="arrow">▾</span>
+            </>
+          )}
         </button>
       </div>
     </NodeBox>
